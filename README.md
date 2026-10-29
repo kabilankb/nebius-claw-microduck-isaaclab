@@ -7,7 +7,7 @@
 
 **🌐 Project page: https://kabilankb.github.io/nebius-claw-microduck-isaaclab/**
 
-> **Every decision in this project is made by Nemotron on Nebius Token Factory** — picking
+> **Every decision in this project is made by Nemotron on [Nebius Token Factory](https://tokenfactory.nebius.com)** — picking
 > the task, reading reward curves, tuning, judging the gait from video, and running the
 > sim-to-real pipeline. Your GPU only simulates; the reasoning runs on Token Factory
 > through one OpenAI-compatible endpoint and one API key.
@@ -37,7 +37,7 @@ for the real robot — from one sentence in a chat window or one command in a te
 **▶ [Watch the demo on YouTube](https://www.youtube.com/watch?v=O5wfg00z8pc)** — the Claw starts MicroDuck training in Isaac
 Lab, *Tune it* and the Nemotron 3.5 VL gait critique, the Duck pilot's
 train → gate → Nemotron 3 Ultra tune → verify pipeline, and the `./duck` terminal workflow,
-with all reasoning on Nemotron via Nebius Token Factory.
+with all reasoning on Nemotron via [Nebius Token Factory](https://tokenfactory.nebius.com).
 
 ## Architecture
 
