@@ -40,7 +40,7 @@ while the console streams the live 3D view and the reward curve.*
 
 ## Architecture
 
-![Architecture: Hermes and OpenClaw agents in OpenShell sandboxes, Isaac control server and Isaac Lab on the host, Nemotron on Nebius Token Factory, deploy to the real MicroDuck](docs/media/architecture.png)
+![Architecture: Hermes and OpenClaw agents in OpenShell sandboxes, Isaac control server and Isaac Lab on the host, Nemotron on Nebius Token Factory, deploy to the real MicroDuck](docs/media/architecture.png?v=4)
 
 ## Why this is useful
 
