@@ -1,143 +1,162 @@
-# isaac-claw
+# nebius-claw-microduck-isaaclab
 
-One repo for driving **NVIDIA Isaac Sim** (simulator) and **Isaac Lab** (RL/IL)
-from a local-model TUI — **NemoClaw** (Nemotron) and **OpenClaw** (Gemma & other
-open models). It consolidates four previously-overlapping projects
-(`humanoid_nemoclaw`, `leisaac`, `warehouse_nemoclaw`, the NemoClaw/OpenClaw
-runtimes) into one readable layout where a 30B-class local model can navigate by
-folder name.
+**Teach a robot to walk by asking for it.** NemoClaw agents running NVIDIA Nemotron
+on **[Nebius Token Factory](https://tokenfactory.nebius.com)** train the
+MicroDuck robot in NVIDIA Isaac Lab, judge the result, tune it, check it, and stage it
+for the real robot — from one sentence in a chat window or one command in a terminal.
 
-The actual simulators are **referenced, not vendored** — set `$ISAAC_SIM_DIR`
-(`~/IsaacSim`) and `$ISAAC_LAB_DIR` (`~/IsaacLab`). This repo holds only the
-custom extension code, scenes, skills, policies, and agent glue.
+```
+"train the duck and get it ready for the robot"
 
-![NemoClaw chat driving Isaac Sim: 4,096 humanoids training at once](docs/media/nemoclaw-demo.png)
-*Chat on the left, 4,096 humanoids learning to walk on the right — the
-non-technical tour is in **[docs/DEMO.md](docs/DEMO.md)**.*
+  train ✓ ─ gate ✓ ─ play ✓ ─ export ✓ ─ verify ✓ ─ deploy ✓
 
-> 📁 **[STRUCTURE.md](STRUCTURE.md)** — full annotated layout + runtime-flow diagram.
-> 🕒 **[HISTORY.md](HISTORY.md)** — complete development history (what was built and why).
-> 🎬 **[docs/DEMO.md](docs/DEMO.md)** — plain-English demo overview (show this one to non-engineers).
+  MicroDuck · flat — Done (dry run)
 
-## Hardware — Dell Pro Max with GB10
+  Policy     2026-10-29_16-00-25 · iteration 750
+  Verify     ✅ 9/9 checks · 786 KB · 61→14 · Δ onnx/torch 3e-06
+  Bundle     isaac_sim/_deploy/IsaacContrib-Velocity-Flat-MicroDuck_20261029-183351
+  Robot      not configured (dry run)
+```
 
-Everything here runs on a **single Dell Pro Max with GB10** desktop — the NVIDIA
-**GB10 Grace Blackwell superchip** (same silicon as DGX Spark):
+## Why this is useful
+
+Getting a walking policy from simulation onto a small robot is normally a day of
+specialist work: launch training, watch reward curves, decide whether the robot is
+really walking or just collecting reward, tweak hyperparameters, restart, export,
+convert the ONNX, check it matches the robot's interface, copy it over, and hope it
+doesn't fall off the table. This project turns that loop into a conversation.
+
+- **Anyone can run it.** A student, a hackathon team or a robotics newcomer types what
+  they want; the agent picks the task, the settings and the tools.
+- **It judges, not just runs.** The pipeline gates on the *fall rate*, not reward
+  alone, automatically resumes with gentler learning when a policy falls too often,
+  and a vision model watches the rollout video and critiques the gait.
+- **It is safe to hand to a real robot.** Every exported policy passes 9 sim-to-real
+  checks (single-file ONNX, 61 observations → 14 actions, ONNX ≡ PyTorch, bounded
+  actions, under the robot's 64 MiB limit). Loading it on the robot always waits for a
+  human to say the duck is on its stand — enforced by the server, not just the prompt.
+- **The answers are honest.** Status replies are rendered from the real pipeline state
+  and relayed verbatim, so the agent can't invent progress.
+- **One laptop GPU is enough.** Simulation and training run locally (tested on an RTX
+  PRO 5000 Blackwell laptop GPU); the thinking happens in the cloud on Token Factory,
+  so no GPU memory goes to the language model.
+
+## Why Nebius Token Factory
+
+The agents need large, tool-calling, reasoning models — far bigger than fit next to a
+4,096-robot simulation on one GPU. Token Factory serves the NVIDIA Nemotron family
+behind one OpenAI-compatible endpoint, so the agents get frontier-class models with
+no local inference at all.
+
+| Role in this project | Token Factory model | Why this one |
+|---|---|---|
+| Claw agent + Duck pilot (planning, tool calls) | `nvidia/nemotron-3-super-120b-a12b` | reliable multi-step tool calling, 262K context |
+| Fast/cheap mode | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | ~5× cheaper ($0.06 / $0.24 per 1M tokens) |
+| Gait critique from video frames | `nvidia/Nemotron-3.5-Super-VL` | vision: watches the rollout, answers in ~3 s |
+| Also switchable | `Nemotron-3-Ultra-550b-a55b`, `Nemotron-3_5-Lightning` | live model switcher in the console |
+
+- **One key, one endpoint:** `https://api.tokenfactory.nebius.com/v1`. Paste the key
+  in the web console; it is verified against `/v1/models`, stored in
+  `~/.openclaw/.env` (mode 600), pushed into the sandboxes, and never shown again.
+- **Switch models live** from the console — the agent keeps working on the new model.
+- **Sandboxed by NemoClaw:** the agents run in OpenShell sandboxes with deny-by-default
+  egress; they are allowed to reach Token Factory and the local Isaac control server.
+- **Pay per token:** the GPU work runs on your own machine, so a whole train → verify
+  run costs only the handful of agent turns that drive it.
+
+## What's inside
+
+```
+ Web console (:8800)  ─┐      ┌─ Claw agent  (OpenClaw in NemoClaw sandbox "isaacsim")
+ ./duck (terminal)    ─┼──────┤                                      │
+                       │      └─ Duck pilot  (Hermes in NemoClaw sandbox "duckpilot")
+                       │                    │  Nemotron on Nebius Token Factory
+                       ▼                    ▼
+              Isaac control server (:5561)  ── one GPU job at a time
+                       │
+                       ▼
+       Isaac Lab 3: MicroDuck · G1 · H1 · Go2 · Cassie · ANYmal-D
+       train → gate → tune → play (mp4 + ONNX) → verify → deploy to the duck
+```
+
+| Piece | What it does |
+|---|---|
+| **Web console** (`web/`) | Nebius-styled page: key box, active model + switcher, live 3D viewer, training stats, chat with live tool steps, *Tune it*, *Critique the gait*, *Replay* |
+| **Claw agent** (`agents/nemoclaw/`) | free-form control: "train the G1 on rough terrain", "how's it going?", "tune it" |
+| **Duck pilot** (`agents/hermes/`) | self-running Hermes agent that owns the whole sim-to-real pipeline for the MicroDuck |
+| **`./duck`** | the same pipeline from a terminal, with live status cards |
+| **Control server** (`isaac_sim/scripts/isaac_control_server.py`) | runs Isaac Lab jobs, the pipeline, the gate, the tuning loop, the deploy |
+| **`verify_policy.py`** (`isaac_lab/scripts/`) | the 9 sim-to-real ONNX checks |
+
+## Quick start
+
+Requirements: an NVIDIA GPU, [Isaac Lab](https://github.com/isaac-sim/IsaacLab)
+(`~/IsaacLab-develop`, with the MicroDuck task), NemoClaw, and a
+[Token Factory API key](https://tokenfactory.nebius.com).
+
+```bash
+echo "NEBIUS_API_KEY=<your key>" >> ~/.openclaw/.env && chmod 600 ~/.openclaw/.env
+
+./demo.sh check      # key, model, GPU memory, ports, checkpoints
+./demo.sh up         # control server + agents + console → http://localhost:8800
+./demo.sh down       # stop everything
+```
+
+First time only, create the duck pilot: `agents/hermes/install_duckpilot.sh`.
+
+### In the browser
+
+Open http://localhost:8800, check the active Nemotron model in the header, then ask
+the **Claw** or the **Duck pilot**:
+
+```
+train the duck on flat terrain, gui, 64 envs, 300 iterations
+how is the training going?            tune it
+critique the gait                     ship the best duck policy we already have
+run the full duck pipeline            the duck is on its stand, load it
+```
+
+### In the terminal
+
+```bash
+./duck run -n 1500 --tries 2      # train → gate → tune → play → verify → deploy, live card
+./duck ship                       # best checkpoint → play → verify → deploy (~30 s)
+./duck status | watch | history
+./duck deploy                     # asks "Is the duck on its stand?" first
+./duck chat                       # talk to the duck pilot on Nemotron
+```
+
+### On the real MicroDuck
+
+Add `DUCK_HOST=microduck@<ip>` to `~/.openclaw/.env` and restart. The pipeline copies
+the verified policy to the robot and waits; after you confirm the duck is on its stand
+it runs `sudo robotctl policy load walk …`. Roll back any time with
+`sudo robotctl policy reset walk`. Without `DUCK_HOST` you get a ready-to-copy bundle
+with `DEPLOY.md`.
+
+### Training on a Nebius cloud GPU
+
+```bash
+./demo.sh up --gpu-host user@<nebius-vm>    # Isaac Lab runs on the VM, console stays local
+```
+
+## Results so far
 
 | | |
 |---|---|
-| GPU | Blackwell (GB10), CUDA — shared coherent memory (`nvidia-smi` shows memory `N/A`) |
-| CPU | 20-core Arm (Grace) — **`linux-aarch64`**, so use the aarch64 Isaac Sim build |
-| Memory | 128 GB unified (CPU+GPU coherent) — sim, RL training, and the local LLM share it |
-| SW | NVIDIA driver 580.x, Isaac Sim `_build/linux-aarch64/release`, conda `env_isaaclab` |
+| MicroDuck flat, 750 iterations | mean reward ~113, falls in ~7.5% of episodes, passes the gate |
+| Exported policy | 786 KB single-file ONNX, 9/9 checks, ONNX vs PyTorch Δ 3e-06 |
+| "Ship best" (play → verify → bundle) | ~30 s end to end |
+| Agent turn on Nemotron 3 Super | ~5–10 s |
+| Gait critique (record → frames → Nemotron 3.5 VL) | ~1.5 min, VL answer in ~3 s |
+| Unitree G1 humanoid, Isaac Lab 3 | 0.34 s per iteration at 1,024 envs |
 
-One box does the whole loop: **Isaac Sim rendering + Isaac Lab training (4096
-envs) + local model inference** (Nemotron/Gemma via Ollama or vLLM on `:8000`).
-The unified memory is why that fits — but it's also why **only one GPU job runs
-at a time** (the control server enforces this with a 409). On aarch64, check
-Python-wheel availability before adding dependencies — x86-only wheels are the
-most common porting snag.
+## More
 
-## Layout
-```
-isaac-claw/
-├── agents/              # the TUI runtimes — differ in MODEL CONFIG, not code
-│   ├── core/            #   shared 4-layer orchestrator (single source of truth)
-│   ├── nemoclaw/        #   Nemotron profile + sandbox agent package
-│   └── openclaw/        #   Gemma/open-model config + skill-deploy
-├── skills/              # model-facing skill library
-│   ├── skills.md        #   ⟵ MASTER ROUTER (load first)   [Goal 5]
-│   ├── task/            #   open environment + robot from a prompt  [Goal 2]
-│   ├── training/        #   RL training control
-│   ├── teleop/          #   SO101 robot control
-│   ├── mimicgen/        #   imitation-learning data pipeline
-│   └── <22 more>        #   physics, sensors, rendering, nav, USD, ROS, meta…
-├── isaac_lab/           # Isaac Lab side (your code; sim referenced via $ISAAC_LAB_DIR)
-│   ├── source/robot_lab/#   pip-installable extension (50 envs, kept nesting)
-│   ├── source/leisaac/  #   SO101 devices/tasks (teleop, vision)
-│   ├── scripts/         #   train / play / teleop / annotate / inference / convert
-│   └── envs_registry.json #  canonical task list served by the control server
-├── isaac_sim/           # Isaac Sim side
-│   ├── source/          #   isaacsim.code_editor.python_server extension (port 8226)
-│   ├── scenes/          #   warehouse.usd + textures (gitignored, regenerable)
-│   └── scripts/         #   build/launch scene, RL task, isaac_control_server.py
-├── policies/            # hyperparameter control panel               [Goal 3]
-│   ├── policy_skill.md  #   ⟵ MASTER tuning router
-│   └── rsl_rl|rl_games|skrl|sb3|robomimic.md
-├── research_papers/     # one folder per paper (paper.pdf + notes.md)
-└── sandbox/             # network policies + sandbox-side clients     [Goal 1/4]
-    ├── policies/        #   egress allowlists (deny-by-default)
-    └── clients/         #   isaaclab-train / isaaclab-send|pick|place|detect
-```
+- [`agents/nemoclaw/RUNBOOK.md`](agents/nemoclaw/RUNBOOK.md) — setup, before-demo checklist, troubleshooting
+- [`agents/hermes/README.md`](agents/hermes/README.md) — the duck pilot and the pipeline stages
+- [`docs/NEBIUS_TEST_REPORT.md`](docs/NEBIUS_TEST_REPORT.md) — Token Factory model tests
+- [`docs/ISAAC_CLAW.md`](docs/ISAAC_CLAW.md) — the underlying isaac-claw stack (Isaac Sim scenes, skills, tuning panel)
 
-## How it works (the five goals)
-
-**Goal 1 — both runtimes operate Sim & Lab.** Every Isaac action goes through one
-host API, [`isaac_sim/scripts/isaac_control_server.py`](isaac_sim/scripts/isaac_control_server.py)
-(port 5561): `GET /envs /scenes /robots /status /logs`, `POST /sim/launch
-/scene/load /robot/spawn /exec /train /play /eval /stop`. The sandbox reaches it
-through a whitelisted policy; the simulator doesn't care which model is driving.
-This generalizes the old training-only server into a full Sim+Lab control surface.
-
-**Goal 2 — open env + robot from a prompt.** A sentence like *"open the warehouse
-with a Unitree G1"* → the model loads [`skills/skills.md`](skills/skills.md),
-matches [`skills/task/`](skills/task/SKILL.md), and issues `POST /sim/launch` then
-`POST /robot/spawn` (robot resolved from `agents/core/assets/catalog.yaml`).
-
-**Goal 3 — one tuning control panel.** [`policies/policy_skill.md`](policies/policy_skill.md)
-routes to per-framework files (RSL-RL, rl_games, skrl, SB3, robomimic). Each has a
-single fenced-YAML knob block (with safe ranges + a symptom→fix table) that the
-launcher parses and the model edits.
-
-**Goal 4 — readable structure.** The four old repos collapse into the tree above;
-OpenClaw vs NemoClaw differ only under `agents/` (model config), sharing
-`agents/core/`. A model navigates by folder name.
-
-**Goal 5 — master skill router.** [`skills/skills.md`](skills/skills.md) lists
-every skill with purpose + trigger keywords + the endpoint it drives, plus
-chaining pipelines — the model-facing table of contents.
-
-## Quick start
-```bash
-export ISAAC_CLAW_DIR=$PWD ISAAC_SIM_DIR=~/IsaacSim ISAAC_LAB_DIR=~/IsaacLab
-export ISAAC_LAB_PYTHON=~/miniforge3/envs/env_isaaclab/bin/python
-
-# 1. start the host control server (run in your own GPU terminal)
-$ISAAC_LAB_PYTHON isaac_sim/scripts/isaac_control_server.py
-
-# 2a. drive it with OpenClaw (Gemma)        — see agents/openclaw/README.md
-openclaw tui
-# 2b. or NemoClaw (Nemotron, sandboxed)     — see agents/nemoclaw/README.md + RUNBOOK.md
-nemoclaw isaacsim connect                 # enter the sandbox (yours may be named differently)
-openclaw tui                              # inside it — plain, NO --session
-```
-
-**NemoClaw one-time setup** (only after a sandbox rebuild — details in
-[`agents/nemoclaw/RUNBOOK.md`](agents/nemoclaw/RUNBOOK.md)):
-```bash
-cd agents/nemoclaw
-nemoclaw onboard                          # create sandbox: pick a tool-capable model (nemotron-3-super:120b)
-./install_skill.sh isaacsim               # skills + :5561 egress policy + dedicated isaac__* MCP tools
-cd ../openclaw && bash install-control-service.sh   # control server as an always-on systemd service
-```
-
-> ⚠️ Inside the sandbox use plain `openclaw tui` — a named `--session <name>` gets
-> network-isolated and cannot reach the control server on `:5561`.
-
-**Sample prompts** (either TUI — full list in [`agents/nemoclaw/RUNBOOK.md`](agents/nemoclaw/RUNBOOK.md)):
-```
-list robots                                   what can I open?
-open the warehouse with spot                  open hospital with agibot_a2d
-train the Unitree Go2 on rough terrain, headless, 4096 envs
-train the Unitree G1 on rough terrain, headless, 4096 envs    # humanoids: G1 / H1 / XBot
-train the G1 dance task, gui, 2 envs          # AMP dance → skrl + amp (auto)
-how's the training going?                     play the Go2 rough policy
-stop the training                             close the sim
-```
-
-> ⚠️ GPU launches (Isaac Sim, training) must run in a real terminal, not inside a
-> tool-call shell. The control server spawns them as host subprocesses on purpose.
-
-## Provenance
-Assembled non-destructively by copy/repurpose; the four source repos are left
-intact. See each subdirectory's README for what came from where.
+Built on NVIDIA Isaac Lab, NVIDIA NemoClaw / OpenClaw / Hermes, the
+MicroDuck open-source robot, and Nebius Token Factory.
