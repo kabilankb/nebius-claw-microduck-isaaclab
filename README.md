@@ -1,5 +1,15 @@
 # nebius-claw-microduck-isaaclab
 
+[![Powered by Nebius Token Factory](https://img.shields.io/badge/Powered%20by-Nebius%20Token%20Factory-E0FF4F?style=for-the-badge&labelColor=052B42)](https://tokenfactory.nebius.com)
+[![NVIDIA Nemotron](https://img.shields.io/badge/LLM-NVIDIA%20Nemotron-76B900?style=for-the-badge)](https://tokenfactory.nebius.com)
+[![Isaac Lab](https://img.shields.io/badge/Sim-Isaac%20Lab%203-1f1f1f?style=for-the-badge)](https://github.com/isaac-sim/IsaacLab)
+[![NemoClaw](https://img.shields.io/badge/Agents-NemoClaw%20%C2%B7%20Hermes-1f1f1f?style=for-the-badge)](https://github.com/nvidia/nemoclaw)
+
+> **Every decision in this project is made by Nemotron on Nebius Token Factory** — picking
+> the task, reading reward curves, tuning, judging the gait from video, and running the
+> sim-to-real pipeline. Your GPU only simulates; the reasoning runs on Token Factory
+> through one OpenAI-compatible endpoint and one API key.
+
 **Teach a robot to walk by asking for it.** NemoClaw agents running NVIDIA Nemotron
 on **[Nebius Token Factory](https://tokenfactory.nebius.com)** train the
 MicroDuck robot in NVIDIA Isaac Lab, judge the result, tune it, check it, and stage it

@@ -21,6 +21,9 @@
       <path d="M-10,8 Q0,14 10,8" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
       <rect x="-20" y="20" width="40" height="12" rx="4" fill="#111"/>
     </g>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7FA000"/>
+    </marker>
   </defs>
 
   <rect width="2000" height="1030" fill="#fff"/>
@@ -127,12 +130,12 @@
   <!-- sandboxes → proxy -->
   <path d="M890,350 H1078" fill="none" stroke="#111" stroke-width="2" marker-end="url(#a)"/>
   <text x="905" y="342" font-size="10">HTTP :5561 (allow-listed)</text>
-  <path d="M470,380 V440 H1078" fill="none" stroke="#111" stroke-width="2" marker-end="url(#a)"/>
-  <text x="905" y="432" font-size="10">Inference</text>
+  <path d="M470,380 V440 H1078" fill="none" stroke="#7FA000" stroke-width="4" marker-end="url(#g)"/>
+  <text x="905" y="432" font-size="12" font-weight="700" fill="#7FA000">Inference</text>
   <path d="M890,628 H1078" fill="none" stroke="#111" stroke-width="2" marker-end="url(#a)"/>
   <text x="905" y="620" font-size="10">HTTP :5561 (allow-listed)</text>
-  <path d="M470,720 V750 H1078" fill="none" stroke="#111" stroke-width="2" marker-end="url(#a)"/>
-  <text x="905" y="742" font-size="10">Inference</text>
+  <path d="M470,720 V750 H1078" fill="none" stroke="#7FA000" stroke-width="4" marker-end="url(#g)"/>
+  <text x="905" y="742" font-size="12" font-weight="700" fill="#7FA000">Inference</text>
 
   <!-- proxy → control server -->
   <path d="M1120,628 H1200 V350 M1120,350 H1200 V190 H1258" fill="none" stroke="#111" stroke-width="2" marker-end="url(#a)"/>
@@ -218,33 +221,38 @@
   <text x="1606" y="609" font-size="10">“on its stand”</text>
 
   <!-- ============ Nebius Token Factory ============ -->
-  <rect x="380" y="850" width="870" height="160" fill="none" stroke="#c4d600" stroke-width="3"/>
-  <text x="1235" y="878" font-size="16" font-weight="700" text-anchor="end">Nebius Token Factory</text>
-  <text x="1235" y="898" font-size="11" fill="#555" text-anchor="end">api.tokenfactory.nebius.com/v1 · OpenAI-compatible</text>
+  <rect x="380" y="845" width="870" height="175" rx="10" fill="#F3FBD2" stroke="#B5D000" stroke-width="5"/>
+  <rect x="380" y="845" width="300" height="40" rx="10" fill="#052B42"/>
+  <rect x="380" y="865" width="300" height="20" fill="#052B42"/>
+  <text x="398" y="872" font-size="19" font-weight="800" fill="#E0FF4F">NEBIUS</text>
+  <text x="480" y="872" font-size="17" font-weight="600" fill="#fff">Token Factory</text>
+  <text x="1232" y="873" font-size="13" font-weight="700" fill="#052B42" text-anchor="end">All agent reasoning runs here · no GPU spent on the LLM</text>
+  <text x="1232" y="893" font-size="11" fill="#444" text-anchor="end">api.tokenfactory.nebius.com/v1 · OpenAI-compatible · one key</text>
 
   <g transform="translate(520,935)" fill="none" stroke="#111" stroke-width="2.5">
     <path d="M0,-22 L19,-11 V11 L0,22 L-19,11 V-11 z"/><circle r="6" fill="#76B900" stroke="none"/>
   </g>
-  <text x="520" y="981" font-size="14" text-anchor="middle">Nemotron 3.5 Super VL</text>
-  <text x="520" y="999" font-size="11" fill="#555" text-anchor="middle">watches the gait video</text>
+  <text x="520" y="981" font-size="15" font-weight="600" text-anchor="middle">Nemotron 3.5 Super VL</text>
+  <text x="520" y="999" font-size="11" fill="#555" text-anchor="middle">watches the gait video · $0.30 / $0.90</text>
 
   <g transform="translate(780,935)" fill="none" stroke="#111" stroke-width="2.5">
     <path d="M0,-22 L19,-11 V11 L0,22 L-19,11 V-11 z"/><circle r="6" fill="#76B900" stroke="none"/>
   </g>
-  <text x="780" y="981" font-size="14" text-anchor="middle">Nemotron 3 Super 120B</text>
-  <text x="780" y="999" font-size="11" fill="#555" text-anchor="middle">plans + tool calls (both agents)</text>
+  <text x="780" y="981" font-size="15" font-weight="600" text-anchor="middle">Nemotron 3 Super 120B</text>
+  <text x="780" y="999" font-size="11" fill="#555" text-anchor="middle">plans + tool calls (both agents) · $0.30 / $0.90</text>
 
   <g transform="translate(1030,935)" fill="none" stroke="#111" stroke-width="2.5">
     <path d="M0,-22 L19,-11 V11 L0,22 L-19,11 V-11 z"/><circle r="6" fill="#76B900" stroke="none"/>
   </g>
-  <text x="1030" y="981" font-size="14" text-anchor="middle">Nemotron 3 Nano · Ultra</text>
-  <text x="1030" y="999" font-size="11" fill="#555" text-anchor="middle">switchable live from the console</text>
+  <text x="1030" y="981" font-size="15" font-weight="600" text-anchor="middle">Nemotron 3 Nano · Ultra</text>
+  <text x="1030" y="999" font-size="11" fill="#555" text-anchor="middle">switchable live · Nano $0.06 / $0.24</text>
 
   <!-- proxy → Token Factory -->
-  <path d="M1100,770 V820 H780 V910" fill="none" stroke="#111" stroke-width="2" marker-end="url(#a)"/>
-  <text x="1110" y="836" font-size="10">Inference · HTTPS</text>
+  <path d="M1100,770 V820 H780 V910" fill="none" stroke="#7FA000" stroke-width="4" marker-end="url(#g)"/>
+  <text x="1110" y="836" font-size="12" font-weight="700" fill="#7FA000">Inference · HTTPS</text>
 
   <!-- console → VL critique -->
-  <path d="M265,560 V935 H496" fill="none" stroke="#111" stroke-width="2" marker-end="url(#a)"/>
-  <text x="275" y="927" font-size="10">gait critique · 6 frames</text>
+  <path d="M265,560 V935 H496" fill="none" stroke="#7FA000" stroke-width="4" marker-end="url(#g)"/>
+  <text x="275" y="832" font-size="12" font-weight="700" fill="#7FA000">gait critique · 6 frames</text>
+  <text x="1232" y="1013" font-size="10" fill="#666" text-anchor="end">prices per 1M tokens, in / out</text>
 </svg>
