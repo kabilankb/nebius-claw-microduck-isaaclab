@@ -74,9 +74,15 @@ def render(card):
 def strip(view):
     """train ✓ ─ gate ● ─ play · … for the current stage."""
     stage, status = view.get("stage"), view.get("status")
-    seen = {h.get("stage") for h in view.get("history", [])}
+    hist = view.get("history", [])
+    seen = {h.get("stage") for h in hist}
+    gates = [h for h in hist if h.get("stage") == "gate"]
+    gate_failed = bool(gates) and not gates[-1].get("passed")
     parts = []
     for st in STAGES:
+        if st == "gate" and gate_failed and not (st == stage and status == "running"):
+            parts.append(c("31", "gate ✗"))
+            continue
         if st == stage and status == "running":
             parts.append(c("33", f"{st} ●"))
         elif st == stage and status == "failed":
