@@ -18,6 +18,18 @@ for the real robot — from one sentence in a chat window or one command in a te
   Robot      not configured (dry run)
 ```
 
+## Demo
+
+[![Demo: chat with the claw, MicroDuck training live in Isaac Lab, Nemotron on Nebius Token Factory](docs/media/demo-thumbnail.jpg)](docs/media/nebius-claw-microduck-demo.mp4)
+
+*▶ [Watch the 2-minute demo](docs/media/nebius-claw-microduck-demo.mp4): one chat message starts MicroDuck
+training; Nemotron 3 Super on Nebius Token Factory picks the task and launches Isaac Lab
+while the console streams the live 3D view and the reward curve.*
+
+## Architecture
+
+![Architecture: Hermes and OpenClaw agents in OpenShell sandboxes, Isaac control server and Isaac Lab on the host, Nemotron on Nebius Token Factory, deploy to the real MicroDuck](docs/media/architecture.png)
+
 ## Why this is useful
 
 Getting a walking policy from simulation onto a small robot is normally a day of
@@ -66,7 +78,7 @@ no local inference at all.
 
 ## What's inside
 
-```
+```text
  Web console (:8800)  ─┐      ┌─ Claw agent  (OpenClaw in NemoClaw sandbox "isaacsim")
  ./duck (terminal)    ─┼──────┤                                      │
                        │      └─ Duck pilot  (Hermes in NemoClaw sandbox "duckpilot")
