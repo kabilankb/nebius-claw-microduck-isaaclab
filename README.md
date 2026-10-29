@@ -32,9 +32,9 @@ for the real robot — from one sentence in a chat window or one command in a te
 
 ## Demo
 
-[![Watch the demo on YouTube: Teach a Robot to Walk by Asking AI](https://img.youtube.com/vi/O5wfg00z8pc/maxresdefault.jpg)](https://www.youtube.com/watch?v=O5wfg00z8pc)
+[![Watch the demo on YouTube: I Taught a Robot to Walk Using AI](https://img.youtube.com/vi/y8F3DNDo6_o/hqdefault.jpg)](https://www.youtube.com/watch?v=y8F3DNDo6_o)
 
-**▶ [Watch the demo on YouTube](https://www.youtube.com/watch?v=O5wfg00z8pc)** — the Claw starts MicroDuck training in Isaac
+**▶ [Watch the demo on YouTube](https://www.youtube.com/watch?v=y8F3DNDo6_o)** — the Claw starts MicroDuck training in Isaac
 Lab, *Tune it* and the Nemotron 3.5 VL gait critique, the Duck pilot's
 train → gate → Nemotron 3 Ultra tune → verify pipeline, and the `./duck` terminal workflow,
 with all reasoning on Nemotron via [Nebius Token Factory](https://tokenfactory.nebius.com).
