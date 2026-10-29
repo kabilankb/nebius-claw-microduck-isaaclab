@@ -102,9 +102,10 @@ Without the hardware, the video and project page show every module working.
    lower values return empty content with no error.
 3. **`/v1/models` lists Ultra and Lightning without context length or pricing** —
    metadata for every listed model would let apps pick a model programmatically.
-4. **Ultra is excellent for judgment calls**: 1.9–2.1 s for a grounded, bounded JSON
-   answer — faster than Nano (6 s) on the same prompt in our tests. Worth documenting
-   that Ultra isn't only for long tasks.
+4. **Ultra is excellent for judgment calls**: on our tuning prompt (3 runs, median) Ultra
+   took 1.9 s (~232 tok/s), Super 2.7 s, Nano 3.3 s — all returned valid JSON, and Ultra
+   gave the most conservative, best-justified answer. Worth documenting that Ultra isn't
+   only for long tasks.
 5. **NemoClaw `inference set`** often reports "health timeout" even though the new
    route is committed and works — misleading in scripts.
 6. **Hermes `mcp add`** prompts interactively to enable tools; a `--yes` flag would make
