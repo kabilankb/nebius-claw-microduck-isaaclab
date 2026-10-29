@@ -32,11 +32,12 @@ for the real robot — from one sentence in a chat window or one command in a te
 
 ## Demo
 
-[![Demo: chat with the claw, MicroDuck training live in Isaac Lab, Nemotron on Nebius Token Factory](docs/media/demo-thumbnail.jpg)](docs/media/nebius-claw-microduck-demo.mp4)
+[![Watch the demo on YouTube: Teach a Robot to Walk by Asking AI](https://img.youtube.com/vi/O5wfg00z8pc/maxresdefault.jpg)](https://www.youtube.com/watch?v=O5wfg00z8pc)
 
-*▶ [Watch the 2-minute demo](docs/media/nebius-claw-microduck-demo.mp4): one chat message starts MicroDuck
-training; Nemotron 3 Super on Nebius Token Factory picks the task and launches Isaac Lab
-while the console streams the live 3D view and the reward curve.*
+**▶ [Watch the demo on YouTube](https://www.youtube.com/watch?v=O5wfg00z8pc)** — the Claw starts MicroDuck training in Isaac
+Lab, *Tune it* and the Nemotron 3.5 VL gait critique, the Duck pilot's
+train → gate → Nemotron 3 Ultra tune → verify pipeline, and the `./duck` terminal workflow,
+with all reasoning on Nemotron via Nebius Token Factory.
 
 ## Architecture
 

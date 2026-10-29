@@ -8,6 +8,7 @@ Copy-ready text for the Devpost form.
 | Track | **Physical AI** |
 | Repository | https://github.com/kabilankb/nebius-claw-microduck-isaaclab (Apache-2.0) |
 | Project page | https://kabilankb.github.io/nebius-claw-microduck-isaaclab/ |
+| Demo video | https://www.youtube.com/watch?v=O5wfg00z8pc |
 | Runs on | Nebius Token Factory (runtime calls to `https://api.tokenfactory.nebius.com/v1`) |
 | NVIDIA models | Nemotron 3 Ultra 550B, Nemotron 3 Super 120B, Nemotron 3.5 Super VL, Nemotron 3 Nano 30B |
 | NVIDIA tools | Isaac Lab 3, NemoClaw, OpenShell, OpenClaw, Hermes Agent |

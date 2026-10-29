@@ -58,6 +58,7 @@ h1 em{font-style:normal;color:var(--lime)}
 .btn:hover{transform:translateY(-1px)}
 .video{border-radius:16px 16px 0 0;overflow:hidden;border:1px solid #ffffff22;border-bottom:0;box-shadow:0 -10px 60px #00000055;background:#000}
 .video video{display:block;width:100%;height:auto}
+.video iframe{display:block;width:100%;aspect-ratio:16/9;border:0}
 
 /* sections */
 section{padding:88px 0}
@@ -148,12 +149,13 @@ footer a{color:var(--lime)}
       sentence in a chat window or one command in a terminal.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/kabilankb/nebius-claw-microduck-isaaclab">View on GitHub →</a>
+      <a class="btn ghost" href="https://www.youtube.com/watch?v=O5wfg00z8pc">Watch on YouTube</a>
       <a class="btn ghost" href="#token-factory">Why Token Factory</a>
     </div>
     <div class="video">
-      <video controls playsinline preload="metadata" poster="media/demo-thumbnail.jpg">
-        <source src="media/nebius-claw-microduck-demo.mp4" type="video/mp4">
-      </video>
+      <iframe src="https://www.youtube-nocookie.com/embed/O5wfg00z8pc?rel=0" title="Teach a Robot to Walk by Asking AI — demo"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowfullscreen loading="lazy"></iframe>
     </div>
   </div>
 </header>
