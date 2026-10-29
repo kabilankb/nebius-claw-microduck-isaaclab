@@ -183,6 +183,7 @@ The tunnel is implemented; it hasn't been run against a Nebius VM yet.
 | Agent turn on Nemotron 3 Super | ~5–10 s |
 | Gait critique (record → frames → Nemotron 3.5 VL) | ~1.5 min, VL answer in ~3 s |
 | Unitree G1 humanoid, Isaac Lab 3 | 0.34 s per iteration at 1,024 envs |
+| Gate fail → Nemotron 3 Ultra tune → retrain (60 + 60 its, strict 5% gate) | Ultra answered in 2 s (lr 3e-4, entropy 0.01); falls 100% → 48%, reward 10.9 → 80.7; run correctly stopped as "still failing" |
 
 ## Built during the hackathon
 

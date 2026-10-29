@@ -908,7 +908,7 @@ def pipeline_card(v):
         ck = Path(v["checkpoint"])
         lines.append(f"Policy     {ck.parent.name} · iteration {ck.stem.split('_')[-1]}"
                      + (" (best existing)" if cfg.get("skip_train") else ""))
-    gates = [h for h in hist if h["stage"] == "gate"]
+    gates = [h for h in hist if h["stage"] == "gate" and "passed" in h]   # verdicts, not the final error
     if gates:
         g = gates[-1]
         lines.append("Gate       " + ("✅ passed" if g.get("passed") else "❌ " + g["msg"].split("(", 1)[-1].rstrip(")"))
