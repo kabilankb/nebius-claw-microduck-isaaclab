@@ -5,6 +5,8 @@
 [![Isaac Lab](https://img.shields.io/badge/Sim-Isaac%20Lab%203-1f1f1f?style=for-the-badge)](https://github.com/isaac-sim/IsaacLab)
 [![NemoClaw](https://img.shields.io/badge/Agents-NemoClaw%20%C2%B7%20Hermes-1f1f1f?style=for-the-badge)](https://github.com/nvidia/nemoclaw)
 
+**🌐 Project page: https://kabilankb.github.io/nebius-claw-microduck-isaaclab/**
+
 > **Every decision in this project is made by Nemotron on Nebius Token Factory** — picking
 > the task, reading reward curves, tuning, judging the gait from video, and running the
 > sim-to-real pipeline. Your GPU only simulates; the reasoning runs on Token Factory
