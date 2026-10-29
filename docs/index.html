@@ -195,8 +195,16 @@ footer a{color:var(--lime)}
       <div class="endpoint">https://api.tokenfactory.nebius.com/v1</div>
     </div>
 
-    <div class="grid g3">
+    <div class="grid g2">
       <div class="model hot">
+        <div class="role">Tuning advisor · when a policy fails the gate</div>
+        <h3>Nemotron 3 Ultra 550B</h3>
+        <code>nvidia/Nemotron-3-Ultra-550b-a55b</code>
+        <p>Reads the failed run — fall rate, episode length, reward trend — and picks the retry's learning rate and
+          entropy, with a one-line reason. Answers in about 2 seconds; bounded, with a fixed-rule fallback.</p>
+        <div class="price"><span>The hardest call in the loop gets the biggest model</span></div>
+      </div>
+      <div class="model">
         <div class="role">Both agents</div>
         <h3>Nemotron 3 Super 120B</h3>
         <code>nvidia/nemotron-3-super-120b-a12b</code>
@@ -214,7 +222,7 @@ footer a{color:var(--lime)}
         <div class="role">Fast mode · switch live</div>
         <h3>Nemotron 3 Nano 30B</h3>
         <code>nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B</code>
-        <p>Five times cheaper for quick turns. Ultra 550B and Lightning are one click away in the console's model switcher.</p>
+        <p>Five times cheaper for quick turns — switch the Claw to it live from the console's model switcher.</p>
         <div class="price"><span>in <b>$0.06</b></span><span>out <b>$0.24</b></span><span>per 1M tokens</span></div>
       </div>
     </div>
@@ -236,7 +244,7 @@ footer a{color:var(--lime)}
     <div class="pipe">
       <span class="st">Train</span><span class="arrow">→</span>
       <span class="st">Gate · fall rate ≤ 25%</span><span class="arrow">→</span>
-      <span class="st">Tune &amp; retrain if it fails</span><span class="arrow">→</span>
+      <span class="st">Nemotron 3 Ultra tunes &amp; retrains if it fails</span><span class="arrow">→</span>
       <span class="st">Play · video + ONNX</span><span class="arrow">→</span>
       <span class="st">Verify · 9 checks</span><span class="arrow">→</span>
       <span class="st robot">Deploy to the duck</span>
@@ -309,7 +317,7 @@ footer a{color:var(--lime)}
 
 <footer>
   <div class="wrap">
-    <span>Built with NVIDIA Isaac Lab, NemoClaw · OpenClaw · Hermes, the MicroDuck robot, and <a href="https://tokenfactory.nebius.com">Nebius Token Factory</a>.</span>
+    <span>Built with NVIDIA Isaac Lab, NemoClaw · OpenClaw · Hermes, the MicroDuck robot, and <a href="https://tokenfactory.nebius.com">Nebius Token Factory</a>. Apache-2.0.</span>
     <a href="https://github.com/kabilankb/nebius-claw-microduck-isaaclab">github.com/kabilankb/nebius-claw-microduck-isaaclab</a>
   </div>
 </footer>

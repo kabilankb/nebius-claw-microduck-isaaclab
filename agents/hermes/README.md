@@ -7,7 +7,7 @@ Factory**, that takes the MicroDuck from nothing to the real robot:
 ```
 train ──▶ gate (fall rate) ──▶ play: record clip + export ONNX ──▶ verify ──▶ deploy
    ▲            │ fail
-   └── tune ◀───┘   resume from the checkpoint, lower learning rate (up to N generations)
+   └── tune ◀───┘   Nemotron 3 Ultra picks the retry settings, resume from the checkpoint (up to N generations)
 ```
 
 The pipeline runs **on the host**, in the control server (`POST /pipeline/start`), not
@@ -18,7 +18,7 @@ reports on it, and handles the one step a human must approve: loading onto the r
 |---|---|---|
 | train | `isaaclab train` headless, 4096 envs, `presets=backlash` | finishes without error |
 | gate | end-of-training fall rate (share of episodes ending in a fall) | ≤ `max_fall_rate` (0.25) |
-| tune | resume from the last checkpoint, learning rate × 0.7 | next gate |
+| tune | Nemotron 3 Ultra (Token Factory) reads the failed run and picks learning rate + entropy (bounded; falls back to lr × 0.7), then resume from the last checkpoint | next gate |
 | play | headless rollout of the gated checkpoint: mp4 + `exported/policy.onnx` | export exists |
 | verify | `isaac_lab/scripts/verify_policy.py`: merge external weights into one ONNX, input 61 / output 14, ONNX ≡ TorchScript (< 1e-4), finite + bounded actions, < 64 MiB | all 9 checks |
 | deploy | `scp` to `DUCK_HOST`, `robotctl policy list`; then **waits**. `duck_deploy_confirm` (only after "the duck is on its stand") runs `sudo robotctl policy load walk …` | robot lists the policy |

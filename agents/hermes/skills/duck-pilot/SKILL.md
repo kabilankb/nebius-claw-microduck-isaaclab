@@ -47,7 +47,8 @@ trains, judges, tunes and retrains.
 
 - Gate = **fall rate** (fraction of episodes ending in a fall) at the end of training.
   Reward alone is not trusted. A failed gate resumes from the last checkpoint with a
-  lower learning rate (that is the "tune" stage), up to `max_generations`.
+  learning rate and entropy chosen by Nemotron 3 Ultra (that is the "tune" stage; the
+  card's `Tune` line shows its reason), up to `max_generations`.
 - Verify = one self-contained ONNX, input 61, output 14, ONNX matches TorchScript
   (diff < 1e-4), finite and bounded actions, under 64 MiB.
 

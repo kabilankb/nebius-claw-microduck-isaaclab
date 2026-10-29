@@ -72,12 +72,15 @@ The agents need large, tool-calling, reasoning models — far bigger than fit ne
 behind one OpenAI-compatible endpoint, so the agents get frontier-class models with
 no local inference at all.
 
-| Role in this project | Token Factory model | Why this one |
+Each job goes to the Nemotron model that fits it — big reasoning where a wrong call
+costs a training run, fast and cheap where it doesn't:
+
+| Job in this project | Token Factory model | Why this one |
 |---|---|---|
-| Claw agent + Duck pilot (planning, tool calls) | `nvidia/nemotron-3-super-120b-a12b` | reliable multi-step tool calling, 262K context |
-| Fast/cheap mode | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | ~5× cheaper ($0.06 / $0.24 per 1M tokens) |
-| Gait critique from video frames | `nvidia/Nemotron-3.5-Super-VL` | vision: watches the rollout, answers in ~3 s |
-| Also switchable | `Nemotron-3-Ultra-550b-a55b`, `Nemotron-3_5-Lightning` | live model switcher in the console |
+| **Tuning advisor** — when a policy fails the gate, reads the run and picks the retry's learning rate and entropy | `nvidia/Nemotron-3-Ultra-550b-a55b` | the hardest judgment call; ~2 s, bounded and with a fallback |
+| **Agents** — Claw and Duck pilot planning and tool calls | `nvidia/nemotron-3-super-120b-a12b` | reliable multi-step tool calling, 262K context |
+| **Gait critique** — watches frames of the rollout video | `nvidia/Nemotron-3.5-Super-VL` | vision; answers in ~3 s |
+| **Fast mode** — switch the Claw live from the console | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | ~5× cheaper ($0.06 / $0.24 per 1M tokens) |
 
 - **One key, one endpoint:** `https://api.tokenfactory.nebius.com/v1`. Paste the key
   in the web console; it is verified against `/v1/models`, stored in
@@ -152,6 +155,10 @@ run the full duck pipeline            the duck is on its stand, load it
 
 ### On the real MicroDuck
 
+> **Status: built, not yet run on hardware.** Everything up to the verified,
+> robot-ready bundle is tested; the copy-and-load step follows the MicroDuck
+> `robotctl` workflow but has not been exercised on a physical duck yet.
+
 Add `DUCK_HOST=microduck@<ip>` to `~/.openclaw/.env` and restart. The pipeline copies
 the verified policy to the robot and waits; after you confirm the duck is on its stand
 it runs `sudo robotctl policy load walk …`. Roll back any time with
@@ -164,6 +171,8 @@ with `DEPLOY.md`.
 ./demo.sh up --gpu-host user@<nebius-vm>    # Isaac Lab runs on the VM, console stays local
 ```
 
+The tunnel is implemented; it hasn't been run against a Nebius VM yet.
+
 ## Results so far
 
 | | |
@@ -174,6 +183,27 @@ with `DEPLOY.md`.
 | Agent turn on Nemotron 3 Super | ~5–10 s |
 | Gait critique (record → frames → Nemotron 3.5 VL) | ~1.5 min, VL answer in ~3 s |
 | Unitree G1 humanoid, Isaac Lab 3 | 0.34 s per iteration at 1,024 envs |
+
+## Built during the hackathon
+
+isaac-claw started in June–July 2026 as a way to drive Isaac Sim from **local** models
+on a DGX box (that stack is described in [`docs/ISAAC_CLAW.md`](docs/ISAAC_CLAW.md)).
+During the Nebius × NVIDIA hackathon it was rebuilt around Nebius Token Factory and
+the MicroDuck sim-to-real loop:
+
+- all agent reasoning moved to Nemotron on Token Factory (custom NemoClaw provider)
+- the Nebius-styled web console: key verification, live model switcher, 3D viewer,
+  training stats, *Tune it*, *Critique the gait* (Nemotron 3.5 VL), *Replay*
+- Isaac Lab 3 tasks for the MicroDuck and the humanoids, with fixes for the broken
+  humanoid training path
+- the **Duck pilot**: a Hermes agent in its own NemoClaw sandbox that runs
+  train → gate → tune (Nemotron 3 Ultra) → play → verify → deploy
+- the 9-check sim-to-real ONNX verifier, the `./duck` CLI, and this project page
+
+## License
+
+[Apache License 2.0](LICENSE). Third-party components keep their own licenses — see
+[`NOTICE`](NOTICE).
 
 ## More
 

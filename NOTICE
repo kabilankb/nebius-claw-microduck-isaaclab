@@ -1,0 +1,21 @@
+nebius-claw-microduck-isaaclab
+Copyright 2026 Kabilan KB
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This project builds on the following open-source components. Files taken from
+them keep their original copyright and SPDX license headers.
+
+- robot_lab (isaac_lab/source/robot_lab) — Copyright (c) 2024-2026 Ziqi Fan,
+  Apache License 2.0. https://github.com/fan-ziqi/robot_lab
+- LeIsaac (isaac_lab/source/leisaac, isaac_lab/scripts/leisaac) — LightwheelAI,
+  Apache License 2.0. https://github.com/LightwheelAI/leisaac
+- Isaac Lab scripts (isaac_lab/scripts/reinforcement_learning, isaac_lab/scripts/tools,
+  isaac_sim/scripts/rl) — Copyright (c) The Isaac Lab Project Developers,
+  BSD 3-Clause License. https://github.com/isaac-sim/IsaacLab
+- NVIDIA NemoClaw / OpenShell integration files marked
+  "SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES" — Apache License 2.0.
+
+Runtime dependencies that are referenced, not included: NVIDIA Isaac Sim, NVIDIA
+Isaac Lab, NVIDIA NemoClaw / OpenClaw / Hermes, and NVIDIA Nemotron models served
+by Nebius Token Factory.

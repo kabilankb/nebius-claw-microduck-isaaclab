@@ -52,6 +52,7 @@ import socket
 import subprocess
 import sys
 import threading
+import urllib.request
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
@@ -644,6 +645,12 @@ VERIFY_SCRIPT = LAB_DIR / "scripts" / "verify_policy.py"
 DUCK_HOST = os.environ.get("DUCK_HOST", "")                 # e.g. microduck@192.168.1.50
 DUCK_POLICY_DIR = os.environ.get("DUCK_POLICY_DIR", "/home/microduck")
 DUCK_SLOT = os.environ.get("DUCK_POLICY_SLOT", "walk")
+# When the gate fails, Nemotron 3 Ultra on Nebius Token Factory reads the run and picks
+# the retry's learning rate / entropy (bounded); any failure falls back to lr x 0.7.
+NEBIUS_BASE_URL = os.environ.get("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1")
+TUNE_MODEL = os.environ.get("NEBIUS_TUNE_MODEL", "nvidia/Nemotron-3-Ultra-550b-a55b")
+NEBIUS_ENV_FILE = Path(os.environ.get("NEBIUS_ENV_FILE", os.path.expanduser("~/.openclaw/.env")))
+TUNE_BOUNDS = {"learning_rate": (1e-5, 3e-3), "entropy_coef": (0.0, 0.02)}
 
 PIPE = {"status": "idle"}
 _pipe_lock = threading.Lock()
@@ -653,6 +660,63 @@ def _pipe_log(stage, msg, **extra):
     PIPE.setdefault("history", []).append({"t": round(time.time()), "stage": stage, "msg": msg, **extra})
     PIPE["stage"] = stage
     print(f"[pipeline] {stage}: {msg}")
+
+
+def _nebius_key():
+    """The Token Factory key, read only when needed (services start without it in env)."""
+    if os.environ.get("NEBIUS_API_KEY"):
+        return os.environ["NEBIUS_API_KEY"]
+    try:
+        for line in NEBIUS_ENV_FILE.read_text().splitlines():
+            if line.startswith("NEBIUS_API_KEY="):
+                return line.split("=", 1)[1].strip().strip("'\"")
+    except OSError:
+        pass
+    return None
+
+
+def tune_advice(m, params):
+    """Ask Nemotron 3 Ultra how to retrain a policy that failed the gate.
+    Returns (new params, reason, source); never raises."""
+    lr = float(params.get("learning_rate", 1e-3))
+    fallback = ({**params, "learning_rate": round(lr * 0.7, 6)},
+                "fixed rule: learning rate x 0.7", "rule")
+    key = _nebius_key()
+    if not key:
+        return fallback
+    rewards = m.get("reward_history") or []
+    facts = {
+        "iterations_trained": m.get("iteration"), "mean_reward": m.get("mean_reward"),
+        "reward_every_10th_of_last_100": rewards[-100::10],
+        "fall_rate": m.get("fell_over"), "terminations": m.get("terminations"),
+        "action_std": m.get("action_std"), "mean_episode_length": m.get("mean_episode_length"),
+        "current": {"learning_rate": lr, "entropy_coef": params.get("entropy_coef", "task default")},
+    }
+    prompt = ("You tune PPO (rsl_rl) for a small bipedal robot, the MicroDuck, in Isaac Lab. "
+              "Training will RESUME from the last checkpoint. The policy failed the gate: too many "
+              "episodes end in a fall. Run summary:\n" + json.dumps(facts) +
+              "\nReply with ONLY a JSON object: {\"learning_rate\": number in [1e-5, 3e-3], "
+              "\"entropy_coef\": number in [0, 0.02], \"reason\": one short sentence citing the numbers}.")
+    body = {"model": TUNE_MODEL, "max_tokens": 1500, "temperature": 0.2,
+            "messages": [{"role": "user", "content": prompt}]}
+    req = urllib.request.Request(NEBIUS_BASE_URL.rstrip("/") + "/chat/completions",
+                                 data=json.dumps(body).encode(),
+                                 headers={"Authorization": f"Bearer {key}",
+                                          "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=90) as r:
+            text = json.load(r)["choices"][0]["message"].get("content") or ""
+        adv = json.loads(re.search(r"\{.*\}", text, re.S).group(0))
+        new = dict(params)
+        for k, (lo, hi) in TUNE_BOUNDS.items():
+            if isinstance(adv.get(k), (int, float)):
+                new[k] = round(min(max(float(adv[k]), lo), hi), 6)
+        if "learning_rate" not in new or new == params:
+            return fallback
+        return new, str(adv.get("reason", "")).strip()[:200], TUNE_MODEL.split("/")[-1]
+    except Exception as e:   # network, bad JSON, rate limit: never block the pipeline
+        print(f"[pipeline] tune advisor unavailable ({e}); using the fixed rule")
+        return fallback
 
 
 def _wait_job(stop_check=lambda: False):
@@ -703,7 +767,8 @@ def _run_pipeline(cfg):
                 PIPE["log_file"] = info["log_file"]
                 _pipe_log("train", f"generation {gen}: {body['max_iterations']} iterations"
                           + (f", resumed from {Path(body['checkpoint']).parent.name}" if body.get("checkpoint") else "")
-                          + (f", overrides {applied}" if applied else ""))
+                          + (f", overrides {', '.join(extra)}" if (extra := [a for a in applied
+                             if a not in ENV_BY_ID[task].get("default_overrides", [])]) else ""))
                 rc = _wait_job()
                 if rc is None or rc < 0:   # cancelled, or /stop'ed (SIGTERM)
                     raise InterruptedError("stopped")
@@ -723,11 +788,13 @@ def _run_pipeline(cfg):
                     break
                 if gen == cfg["max_generations"]:
                     raise RuntimeError(f"gate still failing after {gen} generations: {'; '.join(why)}")
-                # self-improvement step: continue from this checkpoint, a bit more carefully
-                lr = float(body["params"].get("learning_rate", 1e-3)) * 0.7
-                body = {**body, "checkpoint": ckpt,
-                        "params": {**body["params"], "learning_rate": round(lr, 6)}}
-                _pipe_log("tune", f"resuming from {Path(ckpt).name} with learning_rate {lr:.2g}")
+                # self-improvement step: Nemotron 3 Ultra reads the run and picks the retry settings
+                _pipe_log("tune", f"asking {TUNE_MODEL.split('/')[-1]} how to retrain")
+                params, reason, src = tune_advice(m, body["params"])
+                body = {**body, "checkpoint": ckpt, "params": params}
+                knobs = ", ".join(f"{k} {params[k]:.2g}" for k in TUNE_BOUNDS if k in params)
+                _pipe_log("tune", f"resuming from {Path(ckpt).name} with {knobs} — {reason}",
+                          advisor=src, reason=reason, knobs=knobs)
         PIPE["checkpoint"] = ckpt
 
         # play: headless rollout that records a clip AND exports policy.onnx next to the checkpoint
@@ -846,6 +913,11 @@ def pipeline_card(v):
         g = gates[-1]
         lines.append("Gate       " + ("✅ passed" if g.get("passed") else "❌ " + g["msg"].split("(", 1)[-1].rstrip(")"))
                      + (f" (after {len(gates)} generations)" if len(gates) > 1 and g.get("passed") else ""))
+    tunes = [h for h in hist if h["stage"] == "tune" and h.get("knobs")]
+    if tunes:
+        t = tunes[-1]
+        who = "Nemotron 3 Ultra" if "Ultra" in t.get("advisor", "") else t.get("advisor", "rule")
+        lines.append(f"Tune       {who} → {t['knobs']}" + (f" · “{t['reason']}”" if t.get("reason") and who != "rule" else ""))
     ver = v.get("verify")
     if ver and ver.get("ok"):
         d = ver.get("onnx_vs_torch_max_diff")
