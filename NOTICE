@@ -16,6 +16,9 @@ them keep their original copyright and SPDX license headers.
 - NVIDIA NemoClaw / OpenShell integration files marked
   "SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES" — Apache License 2.0.
 
+MicroDuck photo in docs/media/architecture.* — © Pollen Robotics
+(store.pollen-robotics.com), used to illustrate the robot.
+
 Runtime dependencies that are referenced, not included: NVIDIA Isaac Sim, NVIDIA
 Isaac Lab, NVIDIA NemoClaw / OpenClaw / Hermes, and NVIDIA Nemotron models served
 by Nebius Token Factory.
