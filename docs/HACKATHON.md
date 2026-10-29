@@ -62,8 +62,7 @@ Token Factory is what makes this fit on one laptop: the GPU is fully used by a
 4,096-robot simulation, so there is no room for a local 120B–550B model. With one
 OpenAI-compatible endpoint we route each job to the right Nemotron — Ultra for the
 expensive judgment call, Super for tool use, VL for vision, Nano for cheap turns — and
-switch models live without redeploying anything. Before this, the project ran a
-local model on a dedicated DGX box.
+switch models live without redeploying anything.
 
 ## What was significantly updated during the Submission Period
 

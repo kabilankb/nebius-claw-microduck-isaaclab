@@ -185,22 +185,6 @@ The tunnel is implemented; it hasn't been run against a Nebius VM yet.
 | Unitree G1 humanoid, Isaac Lab 3 | 0.34 s per iteration at 1,024 envs |
 | Gate fail → Nemotron 3 Ultra tune → retrain (60 + 60 its, strict 5% gate) | Ultra answered in 2 s (lr 3e-4, entropy 0.01); falls 100% → 48%, reward 10.9 → 80.7; run correctly stopped as "still failing" |
 
-## Built during the hackathon
-
-isaac-claw started in June–July 2026 as a way to drive Isaac Sim from **local** models
-on a DGX box (that stack is described in [`docs/ISAAC_CLAW.md`](docs/ISAAC_CLAW.md)).
-During the Nebius × NVIDIA hackathon it was rebuilt around Nebius Token Factory and
-the MicroDuck sim-to-real loop:
-
-- all agent reasoning moved to Nemotron on Token Factory (custom NemoClaw provider)
-- the Nebius-styled web console: key verification, live model switcher, 3D viewer,
-  training stats, *Tune it*, *Critique the gait* (Nemotron 3.5 VL), *Replay*
-- Isaac Lab 3 tasks for the MicroDuck and the humanoids, with fixes for the broken
-  humanoid training path
-- the **Duck pilot**: a Hermes agent in its own NemoClaw sandbox that runs
-  train → gate → tune (Nemotron 3 Ultra) → play → verify → deploy
-- the 9-check sim-to-real ONNX verifier, the `./duck` CLI, and this project page
-
 ## License
 
 [Apache License 2.0](LICENSE). Third-party components keep their own licenses — see
